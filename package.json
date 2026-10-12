@@ -1,0 +1,16 @@
+{
+  "name": "preboarding-assistance",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "backend": "npm --prefix server run dev",
+    "frontend": "npm --prefix client run dev",
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "start:backend": "npm --prefix server run dev",
+    "start:frontend": "npm --prefix client run dev",
+    "stop": "stop-project.bat"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

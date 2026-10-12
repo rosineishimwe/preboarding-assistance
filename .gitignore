@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+client/dist/
+client/build/
+server/dist/
+server/build/
+client/.vite/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+client/.env
+client/.env.*
+!client/.env.example
+server/.env
+server/.env.*
+!server/.env.example
+
+# Credentials and keys
+*.pem
+*.key
+*.crt
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Optional database dump / local data
+*.sql.gz
