@@ -49,6 +49,12 @@ USE preboarding_assistance;
 SOURCE database/schema.sql;
 ```
 
+## Deployment and GitHub Pages note
+
+This project is designed for a local development environment and for a deployed frontend/backend pair. The frontend is configured to use a live API URL via `VITE_API_BASE_URL`, and the Vite config uses a repository-aware base path for GitHub Pages deployments.
+
+If the frontend is hosted on GitHub Pages, the backend must also be publicly reachable. A GitHub Pages frontend cannot use `http://localhost:5000/api` in production, because that address is local to the developer machine.
+
 ## How to start the project
 
 ### Option 1: One-click startup on Windows
