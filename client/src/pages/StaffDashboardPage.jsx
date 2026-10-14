@@ -34,26 +34,27 @@ export default function StaffDashboardPage() {
 
   const handleAssign = async (requestId) => {
     try {
-      const result = await api(`/requests/${requestId}/assign`, {
+      await api(`/requests/${requestId}/assign`, {
         method: 'POST',
         body: JSON.stringify({ staff_id: user.id }),
       });
-      setMessage('Staff assigned successfully.');
+      setMessage('Request assigned to you successfully.');
       await loadDashboard();
     } catch (err) {
       setError(err.message || 'Unable to assign staff.');
     }
   };
 
-  const handleComplete = async (requestId) => {
+  const handleStatusUpdate = async (requestId, status) => {
     try {
-      await api(`/requests/${requestId}/complete`, {
-        method: 'POST',
+      await api(`/requests/${requestId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
       });
-      setMessage('Assistance marked as complete.');
+      setMessage(`Request status updated to ${status}.`);
       await loadDashboard();
     } catch (err) {
-      setError(err.message || 'Unable to complete request.');
+      setError(err.message || 'Unable to update request status.');
     }
   };
 
@@ -72,8 +73,8 @@ export default function StaffDashboardPage() {
       <div className="stats-grid">
         <StatCard label="Total requests" value={dashboard.stats.total_requests || 0} icon={ClipboardList} />
         <StatCard label="Pending" value={dashboard.stats.pending_requests || 0} icon={TimerReset} />
-        <StatCard label="Accepted" value={dashboard.stats.accepted_requests || 0} icon={CheckCircle2} />
-        <StatCard label="Assigned" value={dashboard.stats.assigned_requests || 0} icon={ListFilter} />
+        <StatCard label="In progress" value={dashboard.stats.in_progress_requests || 0} icon={ListFilter} />
+        <StatCard label="Completed" value={dashboard.stats.completed_requests || 0} icon={CheckCircle2} />
       </div>
 
       <div className="dashboard-grid">
@@ -89,10 +90,8 @@ export default function StaffDashboardPage() {
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
               <option value="all">All statuses</option>
               <option value="Pending">Pending</option>
-              <option value="Under review">Under review</option>
-              <option value="Accepted">Accepted</option>
-              <option value="Staff assigned">Staff assigned</option>
-              <option value="Assistance completed">Assistance completed</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
               <option value="Cancelled">Cancelled</option>
             </select>
           </div>
@@ -115,7 +114,7 @@ export default function StaffDashboardPage() {
       </div>
 
       <section className="panel requests-panel">
-        <h2>Service requests</h2>
+        <h2>Assigned requests</h2>
         <div className="request-list">
           {filteredRequests.length ? (
             filteredRequests.map((request) => (
@@ -129,18 +128,28 @@ export default function StaffDashboardPage() {
                 </div>
 
                 <div className="meta-grid">
+                  <span>Passenger: {request.passenger_name}</span>
+                  <span>Email: {request.passenger_email || 'Not provided'}</span>
+                  <span>Phone: {request.passenger_phone || 'Not provided'}</span>
                   <span>Assistance: {request.assistance_type}</span>
-                  <span>Contact: {request.preferred_contact_method}</span>
                   <span>Departure: {request.preferred_departure_time}</span>
+                  <span>Preferred contact: {request.preferred_contact_method}</span>
                 </div>
 
+                <p><strong>Request details:</strong> {request.additional_instructions || 'No extra instructions listed.'}</p>
+
                 <div className="request-actions">
-                  <button type="button" className="btn btn-secondary" onClick={() => handleAssign(request.id)}>
-                    Assign to me
-                  </button>
-                  <button type="button" className="btn btn-primary" onClick={() => handleComplete(request.id)}>
-                    Mark completed
-                  </button>
+                  <select value={request.status} onChange={(event) => handleStatusUpdate(request.id, event.target.value)}>
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                  {request.assigned_staff_id !== user.id && (
+                    <button type="button" className="btn btn-secondary" onClick={() => handleAssign(request.id)}>
+                      Assign to me
+                    </button>
+                  )}
                 </div>
               </article>
             ))

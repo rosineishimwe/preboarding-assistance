@@ -3,9 +3,20 @@ import { BarChart3, BriefcaseBusiness, Users } from 'lucide-react';
 import api from '../services/api';
 import StatCard from '../components/StatCard';
 
+const emptySettings = {
+  organization_name: '',
+  contact_email: '',
+  contact_phone: '',
+  email_notifications_enabled: false,
+  whatsapp_notifications_enabled: false,
+  notes: '',
+};
+
 export default function AdminDashboardPage() {
-  const [dashboard, setDashboard] = useState({ userStats: {}, requestStats: {}, feedback: [], users: [] });
+  const [dashboard, setDashboard] = useState({ userStats: {}, requestStats: {}, feedback: [], users: [], organizationSettings: {} });
   const [requests, setRequests] = useState([]);
+  const [assignmentDrafts, setAssignmentDrafts] = useState({});
+  const [settings, setSettings] = useState(emptySettings);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -16,6 +27,14 @@ export default function AdminDashboardPage() {
     ]);
     setDashboard(adminData);
     setRequests(requestData.requests || []);
+    setSettings({
+      organization_name: adminData.organizationSettings?.organization_name || '',
+      contact_email: adminData.organizationSettings?.contact_email || '',
+      contact_phone: adminData.organizationSettings?.contact_phone || '',
+      email_notifications_enabled: Boolean(adminData.organizationSettings?.email_notifications_enabled),
+      whatsapp_notifications_enabled: Boolean(adminData.organizationSettings?.whatsapp_notifications_enabled),
+      notes: adminData.organizationSettings?.notes || '',
+    });
   };
 
   useEffect(() => {
@@ -47,6 +66,40 @@ export default function AdminDashboardPage() {
       setError(err.message || 'Unable to update user access.');
     }
   };
+
+  const handleAssignRequest = async (requestId, staffId) => {
+    try {
+      if (!staffId) {
+        setError('Select a staff member before assigning a request.');
+        return;
+      }
+
+      const response = await api(`/requests/${requestId}/assign`, {
+        method: 'POST',
+        body: JSON.stringify({ staff_id: Number(staffId) }),
+      });
+      setMessage(response.message || 'Request assigned successfully.');
+      await loadData();
+    } catch (err) {
+      setError(err.message || 'Unable to assign request.');
+    }
+  };
+
+  const handleSettingsSave = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await api('/dashboard/organization-settings', {
+        method: 'PATCH',
+        body: JSON.stringify(settings),
+      });
+      setMessage(response.message || 'Organization settings updated successfully.');
+      await loadData();
+    } catch (err) {
+      setError(err.message || 'Unable to save organization settings.');
+    }
+  };
+
+  const staffUsers = (dashboard.users || []).filter((user) => ['staff', 'admin'].includes(user.role));
 
   return (
     <div className="container dashboard-shell">
@@ -87,11 +140,43 @@ export default function AdminDashboardPage() {
           <h2>Operational summary</h2>
           <ul className="list-plain">
             <li>Pending requests: {dashboard.requestStats.pending_requests || 0}</li>
+            <li>In progress: {dashboard.requestStats.in_progress_requests || 0}</li>
             <li>Cancelled requests: {dashboard.requestStats.cancelled_requests || 0}</li>
             <li>Completed requests: {dashboard.requestStats.completed_requests || 0}</li>
           </ul>
         </section>
       </div>
+
+      <section className="panel requests-panel">
+        <h2>Organization notification settings</h2>
+        <form className="form-grid" onSubmit={handleSettingsSave}>
+          <label>
+            Organization name
+            <input value={settings.organization_name} onChange={(event) => setSettings({ ...settings, organization_name: event.target.value })} />
+          </label>
+          <label>
+            Contact email
+            <input type="email" value={settings.contact_email} onChange={(event) => setSettings({ ...settings, contact_email: event.target.value })} placeholder="admin@organization.example" />
+          </label>
+          <label>
+            Contact phone
+            <input value={settings.contact_phone} onChange={(event) => setSettings({ ...settings, contact_phone: event.target.value })} placeholder="+250 ..." />
+          </label>
+          <label>
+            Email notifications enabled
+            <input type="checkbox" checked={settings.email_notifications_enabled} onChange={(event) => setSettings({ ...settings, email_notifications_enabled: event.target.checked })} />
+          </label>
+          <label>
+            WhatsApp notifications enabled
+            <input type="checkbox" checked={settings.whatsapp_notifications_enabled} onChange={(event) => setSettings({ ...settings, whatsapp_notifications_enabled: event.target.checked })} />
+          </label>
+          <label className="full-width">
+            Notes
+            <textarea rows="3" value={settings.notes} onChange={(event) => setSettings({ ...settings, notes: event.target.value })} />
+          </label>
+          <button type="submit" className="btn btn-primary full-width">Save settings</button>
+        </form>
+      </section>
 
       <section className="panel requests-panel">
         <h2>Manage authorized staff accounts</h2>
@@ -142,10 +227,8 @@ export default function AdminDashboardPage() {
                 </div>
                 <select value={request.status} onChange={(event) => handleStatusChange(request.id, event.target.value)}>
                   <option value="Pending">Pending</option>
-                  <option value="Under review">Under review</option>
-                  <option value="Accepted">Accepted</option>
-                  <option value="Staff assigned">Staff assigned</option>
-                  <option value="Assistance completed">Assistance completed</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
                   <option value="Cancelled">Cancelled</option>
                 </select>
               </div>
@@ -153,6 +236,20 @@ export default function AdminDashboardPage() {
                 <span>Type: {request.assistance_type}</span>
                 <span>Contact: {request.preferred_contact_method}</span>
                 <span>Assigned staff: {request.staff_name || 'Not assigned yet'}</span>
+              </div>
+              <div className="request-actions">
+                <select
+                  value={assignmentDrafts[request.id] ?? request.assigned_staff_id ?? ''}
+                  onChange={(event) => setAssignmentDrafts({ ...assignmentDrafts, [request.id]: event.target.value })}
+                >
+                  <option value="">Select staff member</option>
+                  {staffUsers.map((staff) => (
+                    <option key={staff.id} value={staff.id}>{staff.full_name}</option>
+                  ))}
+                </select>
+                <button type="button" className="btn btn-secondary" onClick={() => handleAssignRequest(request.id, assignmentDrafts[request.id] ?? request.assigned_staff_id)}>
+                  Assign staff
+                </button>
               </div>
             </article>
           ))}

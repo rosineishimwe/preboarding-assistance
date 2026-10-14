@@ -1,191 +1,199 @@
 # Pre-Boarding Assistance System for Passengers with Disabilities in Kigali
 
-This project is a full-stack web application for pre-boarding accessibility support in Kigali, Rwanda. It lets passengers request help before travel, while staff and administrators review and coordinate assistance requests.
+This project is a full-stack web application for pre-boarding accessibility support in Kigali, Rwanda. Passengers can request assistance before travel, while staff and administrators review, assign, and track those requests.
 
 ## Project structure
 
 - client/ - React + Vite frontend
 - server/ - Express.js API
-- database/ - MySQL schema and demo data
+- database/ - MySQL schema and application data structure
 - start-project.bat - one-click launcher for Windows
-- stop-project.bat - stops only project processes
-- package.json - convenience scripts for starting the app from the root folder
+- stop-project.bat - stops project processes
+- package.json - root scripts for launching both apps together
 
 ## Required software
 
 - Node.js LTS
-- MySQL or XAMPP/MySQL service running locally
+- MySQL or XAMPP/MySQL running locally
 - A browser such as Chrome or Edge
 
-## First-time setup
+## Safe setup for GitHub and local development
 
-1. Open a terminal in the project root folder.
-2. Install the root scripts:
+1. Clone the project.
+2. In the project root, install the root scripts:
 
 ```bash
 npm install
 ```
 
-3. Make sure the backend environment file exists:
-   - server/.env
+3. Copy the example environment files and replace the sample values with your local settings:
 
-4. Make sure the frontend environment file exists:
-   - client/.env
+```powershell
+Copy-Item .env.example .env
+Copy-Item server/.env.example server/.env
+Copy-Item client/.env.example client/.env
+```
 
-5. Check the values in these files:
-   - server/.env contains the DB settings, JWT secret, and API port.
-   - client/.env contains VITE_API_BASE_URL.
+4. Update the values in the copied files only.
+   - server/.env contains database credentials, JWT secret, and backend settings
+   - client/.env contains the frontend API URL
+   - Never commit real passwords, API keys, or tokens
 
-6. Start MySQL.
-
-7. Import the schema and sample data if needed:
+5. Make sure MySQL is running.
+6. Import the schema if it has not been created yet:
 
 ```powershell
 & "C:\xampp\mysql\bin\mysql.exe" -uroot
-```
-
-Then run:
-
-```sql
 CREATE DATABASE IF NOT EXISTS preboarding_assistance;
 USE preboarding_assistance;
 SOURCE database/schema.sql;
-SOURCE database/seed.sql;
 ```
-
-If you are using XAMPP, open XAMPP Control Panel and click Start for MySQL.
 
 ## How to start the project
 
-### First time
+### Option 1: One-click startup on Windows
 
-From the project root:
+Double-click:
+
+- start-project.bat
+
+This starts:
+- Express backend on http://localhost:5000
+- React frontend on http://localhost:5173
+- the browser on the frontend URL
+
+### Option 2: Manual startup from the project root
 
 ```bash
 npm install
 npm run start
 ```
 
-This starts the backend and frontend together.
+### Option 3: Run backend and frontend separately
 
-### One-click startup on Windows
-
-Double-click:
-
-- start-project.bat
-
-This will:
-- start the backend in one terminal
-- start the frontend in another terminal
-- open the app in your default browser
-- keep both processes running
-
-The app runs at:
-
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5000
+```bash
+npm run start:backend
+npm run start:frontend
+```
 
 ## How to stop the project
 
-You can stop the app in either of these ways:
-
-1. Close the terminal windows manually.
-2. Double-click stop-project.bat.
-3. Run this command from the root folder:
+- Close the terminal windows manually, or
+- Run:
 
 ```bash
 npm run stop
 ```
 
-## Frontend and backend ports
+## Default local URLs
 
-The project is configured as follows:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5000
+- Health check: http://localhost:5000/api/health
 
-- Frontend port: 5173
-- Backend port: 5000
+## Configuration checklist for local and production use
 
-These values are set in:
+### Required local values
 
-- client/vite.config.js
-- server/src/server.js
 - server/.env
+  - DB_HOST
+  - DB_PORT
+  - DB_USER
+  - DB_PASSWORD
+  - DB_NAME
+  - JWT_SECRET
+  - FRONTEND_ORIGIN
 
-Do not change them unless you also update the matching frontend API URL and environment config.
+- client/.env
+  - VITE_API_BASE_URL
 
-## MySQL configuration and verification
+### Production guidance
 
-The database connection is configured in:
+- Replace localhost URLs with the real frontend and backend domains.
+- Keep all secrets in `.env` files only.
+- Do not hardcode local hostnames into shipped builds.
+- Use environment variables for deployment configuration.
 
-- server/src/config/db.js
-- server/.env
+## Security and GitHub publishing
 
-Important:
-- Never share or commit your real database password.
-- Keep the password only in your local server/.env file.
+The project is prepared for safe publishing to GitHub:
 
-To verify MySQL is running on Windows:
+- `.env` files are ignored by `.gitignore`
+- example files contain placeholder values only
+- real credentials stay local to your machine
+- no password or API key is stored in the Git-tracked project files
+
+> Do not commit actual `.env` files. Keep them on your local device or a secret manager.
+
+## Verified application flows
+
+The project has been validated for:
+
+- registration and login
+- passenger request submission
+- generated reference numbers
+- staff assignment
+- request tracking and status updates
+- passenger-only access restrictions
+- database-backed request storage
+
+The backend verification suite covers these flows:
+
+```powershell
+cd server
+npm test
+```
+
+## MySQL verification
+
+Check if MySQL is running:
 
 ```powershell
 Get-Service mysql
 ```
 
-Or, if you are using XAMPP:
+If using XAMPP:
 
 - Open XAMPP Control Panel
 - Start MySQL
 
-To verify the database is reachable:
+Then confirm the database is reachable:
 
 ```powershell
 & "C:\xampp\mysql\bin\mysql.exe" -uroot -e "SHOW DATABASES;"
 ```
 
-Then check that the database exists:
+## Final deployment checklist
 
-```powershell
-& "C:\xampp\mysql\bin\mysql.exe" -uroot -D preboarding_assistance -e "SHOW TABLES;"
-```
+### Ready
 
-If your project is using a custom password, update the DB_PASSWORD value in server/.env only. Keep the password local and do not overwrite it with a shared value.
+- [x] React/Vite frontend builds successfully
+- [x] Node.js/Express backend starts successfully
+- [x] MySQL integration works with the app schema
+- [x] Passenger and staff flows are implemented and validated
+- [x] Local startup script works on Windows
+- [x] `.gitignore` protects `.env` files
+- [x] Example environment files use placeholders only
+- [x] README explains setup and startup clearly
 
-## Default demo accounts
+### Failed or blocked
 
-The seeded accounts are:
+- [ ] Real email notifications are not active until valid SMTP credentials are supplied
+- [ ] Official organization contact details must be confirmed before publication
+- [ ] Any live WhatsApp or SMS integration must be approved and secured by the real organization
 
-- Passenger: passenger@example.com / Pass@1234
-- Staff: staff@example.com / Staff@1234
-- Admin: admin@example.com / Admin@1234
+### Still needed before public launch
 
-## Common troubleshooting
-
-### Node.js not found
-
-Install Node.js LTS and reopen the terminal.
-
-### Backend port 5000 is already in use
-
-Another app may already be using that port. Stop the conflicting program or change the PORT value in server/.env.
-
-### Frontend port 5173 is already in use
-
-Another app may be running on 5173. Stop it or change the port in client/vite.config.js.
-
-### MySQL connection failed
-
-- Check if MySQL is running.
-- Confirm the database name and credentials in server/.env.
-- Verify the database exists with SHOW DATABASES.
-
-### Browser says the page is blank or the API is unreachable
-
-- Confirm the backend is running.
-- Visit http://localhost:5000/api/health
-- Confirm the frontend is running on http://localhost:5173
-- Check the terminal windows opened by the batch file for error messages.
+- [ ] Configure real SMTP settings in server/.env
+- [ ] Confirm official organization email and phone number
+- [ ] Set production-safe frontend and backend URLs in environment files
+- [ ] Deploy the backend to a secure host or reverse proxy
+- [ ] Deploy the frontend to a hosting provider or static server
+- [ ] Run final acceptance testing with real staff/admin accounts
 
 ## Notes
 
-This project preserves the existing React pages, Express routes, authentication, dashboards, and MySQL schema. The launcher only makes it easier to start and stop the application on Windows.
+This project preserves the current working app structure and does not remove working features. It is ready for local testing and safe deployment preparation, but it should not claim real email delivery or official contact information until the organization confirms those details.
 
 ## License
 

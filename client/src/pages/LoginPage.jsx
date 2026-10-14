@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,6 +8,10 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setForm({ email: '', password: '' });
+  }, []);
 
   if (user) {
     const destination = user.role === 'passenger' ? '/dashboard/passenger' : user.role === 'staff' ? '/dashboard/staff' : '/dashboard/admin';
@@ -43,14 +47,14 @@ export default function LoginPage() {
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form className="form-stack" onSubmit={handleSubmit}>
+        <form className="form-stack" onSubmit={handleSubmit} autoComplete="on">
           <label>
             Email
-            <input type="email" name="email" value={form.email} onChange={handleChange} required />
+            <input type="email" name="email" value={form.email} onChange={handleChange} required autoComplete="username" />
           </label>
           <label>
             Password
-            <input type="password" name="password" value={form.password} onChange={handleChange} required />
+            <input type="password" name="password" value={form.password} onChange={handleChange} required autoComplete="current-password" />
           </label>
 
           <button type="submit" className="btn btn-primary" disabled={loading}>

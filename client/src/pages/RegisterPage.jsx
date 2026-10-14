@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,6 +16,10 @@ export default function RegisterPage() {
   const [form, setForm] = useState(defaultForm);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setForm({ ...defaultForm });
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -45,22 +49,22 @@ export default function RegisterPage() {
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <form className="form-grid" onSubmit={handleSubmit}>
+        <form className="form-grid" onSubmit={handleSubmit} autoComplete="on">
           <label>
             Full name
-            <input name="full_name" value={form.full_name} onChange={handleChange} required />
+            <input name="full_name" value={form.full_name} onChange={handleChange} required autoComplete="name" />
           </label>
           <label>
             Email address
-            <input type="email" name="email" value={form.email} onChange={handleChange} required />
+            <input type="email" name="email" value={form.email} onChange={handleChange} required autoComplete="email" />
           </label>
           <label>
             Phone number
-            <input name="phone" value={form.phone} onChange={handleChange} />
+            <input name="phone" value={form.phone} onChange={handleChange} autoComplete="tel" />
           </label>
           <label>
             Preferred contact method
-            <select name="preferred_contact_method" value={form.preferred_contact_method} onChange={handleChange}>
+            <select name="preferred_contact_method" value={form.preferred_contact_method} onChange={handleChange} autoComplete="off">
               <option value="phone">Phone</option>
               <option value="email">Email</option>
               <option value="sms">SMS</option>
@@ -69,7 +73,7 @@ export default function RegisterPage() {
           </label>
           <label className="full-width">
             Password
-            <input type="password" name="password" value={form.password} onChange={handleChange} required />
+            <input type="password" name="password" value={form.password} onChange={handleChange} required autoComplete="new-password" />
           </label>
 
           <button type="submit" className="btn btn-primary full-width" disabled={loading}>

@@ -16,6 +16,13 @@ if errorlevel 1 (
   exit /b 1
 )
 
+for /f "tokens=1" %%P in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-NetTCPConnection -LocalPort %BACKEND_PORT%,%FRONTEND_PORT%,5174 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique" 2^>nul') do (
+  if not "%%P"=="" (
+    echo Cleaning up stale processes using ports %BACKEND_PORT% and %FRONTEND_PORT%...
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-NetTCPConnection -LocalPort %BACKEND_PORT%,%FRONTEND_PORT%,5174 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }"
+  )
+)
+
 if not exist "%BACKEND_DIR%\package.json" (
   echo ERROR: Backend folder not found: %BACKEND_DIR%
   pause

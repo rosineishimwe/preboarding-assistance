@@ -1,9 +1,7 @@
 const palette = {
   Pending: 'warning',
-  'Under review': 'info',
-  Accepted: 'success',
-  'Staff assigned': 'primary',
-  'Assistance completed': 'success',
+  'In Progress': 'info',
+  Completed: 'success',
   Cancelled: 'danger',
 };
 

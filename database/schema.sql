@@ -16,6 +16,26 @@ CREATE TABLE users (
   KEY idx_users_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE organization_settings (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  organization_name VARCHAR(120) NOT NULL DEFAULT 'Pre-Boarding Assistance',
+  contact_email VARCHAR(150) NULL,
+  contact_phone VARCHAR(30) NULL,
+  email_notifications_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  whatsapp_notifications_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  notes TEXT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO organization_settings (
+  organization_name, contact_email, contact_phone,
+  email_notifications_enabled, whatsapp_notifications_enabled, notes
+) VALUES (
+  'Pre-Boarding Assistance', NULL, NULL, FALSE, FALSE,
+  'External email and WhatsApp notifications are not configured yet. Requests remain stored in the database.'
+);
+
 CREATE TABLE passenger_profiles (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL UNIQUE,
@@ -50,10 +70,8 @@ CREATE TABLE assistance_requests (
   preferred_contact_method ENUM('phone', 'email', 'sms', 'whatsapp') NOT NULL DEFAULT 'phone',
   status ENUM(
     'Pending',
-    'Under review',
-    'Accepted',
-    'Staff assigned',
-    'Assistance completed',
+    'In Progress',
+    'Completed',
     'Cancelled'
   ) NOT NULL DEFAULT 'Pending',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -98,6 +116,8 @@ CREATE TABLE notifications (
   title VARCHAR(150) NOT NULL,
   message TEXT NOT NULL,
   type ENUM('request_submission', 'request_update', 'staff_assignment', 'completion', 'system') NOT NULL DEFAULT 'system',
+  delivery_channel ENUM('in_app', 'email', 'whatsapp', 'sms') NOT NULL DEFAULT 'in_app',
+  delivery_status ENUM('stored', 'queued', 'sent', 'failed', 'disabled', 'not_required') NOT NULL DEFAULT 'stored',
   is_read BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),

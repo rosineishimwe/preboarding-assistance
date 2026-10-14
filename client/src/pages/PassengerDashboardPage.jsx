@@ -126,7 +126,7 @@ export default function PassengerDashboardPage() {
       <div className="stats-grid">
         <StatCard label="Total requests" value={dashboard.stats.total_requests || 0} icon={ClipboardList} />
         <StatCard label="Pending" value={dashboard.stats.pending_requests || 0} icon={Clock3} />
-        <StatCard label="Accepted" value={dashboard.stats.accepted_requests || 0} icon={Flag} />
+        <StatCard label="In progress" value={dashboard.stats.in_progress_requests || 0} icon={Flag} />
         <StatCard label="Completed" value={dashboard.stats.completed_requests || 0} icon={Star} />
       </div>
 
@@ -232,7 +232,7 @@ export default function PassengerDashboardPage() {
                   {request.staff_name && <span>Assigned staff: {request.staff_name}</span>}
                 </div>
 
-                {request.status !== 'Assistance completed' && request.status !== 'Cancelled' && (
+                {request.status !== 'Completed' && request.status !== 'Cancelled' && (
                   <div className="request-actions">
                     <button type="button" className="btn btn-secondary" onClick={() => handleEditRequest(request)}>
                       Edit
@@ -243,7 +243,7 @@ export default function PassengerDashboardPage() {
                   </div>
                 )}
 
-                {request.status === 'Assistance completed' && (
+                {request.status === 'Completed' && (
                   <div className="feedback-box">
                     <select
                       value={feedbackDrafts[request.id]?.rating || 5}
