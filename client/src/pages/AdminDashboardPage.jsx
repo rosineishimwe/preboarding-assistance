@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BarChart3, BriefcaseBusiness, Users } from 'lucide-react';
+import { BarChart3, BriefcaseBusiness, Settings2, Users } from 'lucide-react';
 import api from '../services/api';
 import StatCard from '../components/StatCard';
 
@@ -108,6 +108,7 @@ export default function AdminDashboardPage() {
           <p className="eyebrow">Administrator dashboard</p>
           <h1>System overview and operational control</h1>
         </div>
+        <span className="header-badge">Admin controls</span>
       </div>
 
       {message && <div className="alert alert-success">{message}</div>}
@@ -122,12 +123,19 @@ export default function AdminDashboardPage() {
 
       <div className="dashboard-grid">
         <section className="panel">
-          <h2>Feedback and reports</h2>
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow small">Feedback</p>
+              <h2>Passenger reports</h2>
+            </div>
+          </div>
           {(dashboard.feedback || []).length ? (
             <ul className="list-plain">
               {dashboard.feedback.map((item) => (
-                <li key={item.id}>
-                  <strong>{item.full_name}</strong> rated {item.rating}/5 - {item.comments || 'No extra comments provided.'}
+                <li key={item.id} className="summary-item">
+                  <strong>{item.full_name}</strong>
+                  <span>rated {item.rating}/5</span>
+                  <p>{item.comments || 'No extra comments provided.'}</p>
                 </li>
               ))}
             </ul>
@@ -137,49 +145,69 @@ export default function AdminDashboardPage() {
         </section>
 
         <section className="panel">
-          <h2>Operational summary</h2>
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow small">Overview</p>
+              <h2>Operational summary</h2>
+            </div>
+          </div>
           <ul className="list-plain">
-            <li>Pending requests: {dashboard.requestStats.pending_requests || 0}</li>
-            <li>In progress: {dashboard.requestStats.in_progress_requests || 0}</li>
-            <li>Cancelled requests: {dashboard.requestStats.cancelled_requests || 0}</li>
-            <li>Completed requests: {dashboard.requestStats.completed_requests || 0}</li>
+            <li className="summary-item"><strong>Pending requests</strong><span>{dashboard.requestStats.pending_requests || 0}</span></li>
+            <li className="summary-item"><strong>In progress</strong><span>{dashboard.requestStats.in_progress_requests || 0}</span></li>
+            <li className="summary-item"><strong>Cancelled requests</strong><span>{dashboard.requestStats.cancelled_requests || 0}</span></li>
+            <li className="summary-item"><strong>Completed requests</strong><span>{dashboard.requestStats.completed_requests || 0}</span></li>
           </ul>
         </section>
       </div>
 
       <section className="panel requests-panel">
-        <h2>Organization notification settings</h2>
-        <form className="form-grid" onSubmit={handleSettingsSave}>
-          <label>
-            Organization name
-            <input value={settings.organization_name} onChange={(event) => setSettings({ ...settings, organization_name: event.target.value })} />
-          </label>
-          <label>
-            Contact email
-            <input type="email" value={settings.contact_email} onChange={(event) => setSettings({ ...settings, contact_email: event.target.value })} placeholder="admin@organization.example" />
-          </label>
-          <label>
-            Contact phone
-            <input value={settings.contact_phone} onChange={(event) => setSettings({ ...settings, contact_phone: event.target.value })} placeholder="+250 ..." />
-          </label>
-          <label>
-            Email notifications enabled
-            <input type="checkbox" checked={settings.email_notifications_enabled} onChange={(event) => setSettings({ ...settings, email_notifications_enabled: event.target.checked })} />
-          </label>
-          <label>
-            WhatsApp notifications enabled
-            <input type="checkbox" checked={settings.whatsapp_notifications_enabled} onChange={(event) => setSettings({ ...settings, whatsapp_notifications_enabled: event.target.checked })} />
-          </label>
-          <label className="full-width">
-            Notes
-            <textarea rows="3" value={settings.notes} onChange={(event) => setSettings({ ...settings, notes: event.target.value })} />
-          </label>
-          <button type="submit" className="btn btn-primary full-width">Save settings</button>
+        <div className="panel-header">
+          <div>
+            <p className="eyebrow small">Settings</p>
+            <h2>Organization notification settings</h2>
+          </div>
+          <span className="section-pill"><Settings2 size={14} /> Configure</span>
+        </div>
+        <form className="request-form" onSubmit={handleSettingsSave}>
+          <div className="field-grid">
+            <label>
+              Organization name
+              <input value={settings.organization_name} onChange={(event) => setSettings({ ...settings, organization_name: event.target.value })} />
+            </label>
+            <label>
+              Contact email
+              <input type="email" value={settings.contact_email} onChange={(event) => setSettings({ ...settings, contact_email: event.target.value })} placeholder="admin@organization.example" />
+            </label>
+            <label>
+              Contact phone
+              <input value={settings.contact_phone} onChange={(event) => setSettings({ ...settings, contact_phone: event.target.value })} placeholder="+250 ..." />
+            </label>
+            <label className="checkbox-field">
+              <span>Email notifications enabled</span>
+              <input type="checkbox" checked={settings.email_notifications_enabled} onChange={(event) => setSettings({ ...settings, email_notifications_enabled: event.target.checked })} />
+            </label>
+            <label className="checkbox-field">
+              <span>WhatsApp notifications enabled</span>
+              <input type="checkbox" checked={settings.whatsapp_notifications_enabled} onChange={(event) => setSettings({ ...settings, whatsapp_notifications_enabled: event.target.checked })} />
+            </label>
+            <label className="field-full-width">
+              Notes
+              <textarea rows="3" value={settings.notes} onChange={(event) => setSettings({ ...settings, notes: event.target.value })} />
+            </label>
+          </div>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary">Save settings</button>
+          </div>
         </form>
       </section>
 
       <section className="panel requests-panel">
-        <h2>Manage authorized staff accounts</h2>
+        <div className="panel-header">
+          <div>
+            <p className="eyebrow small">Access</p>
+            <h2>Manage authorized staff accounts</h2>
+          </div>
+        </div>
         <div className="request-list plus-table">
           {(dashboard.users || []).map((user) => (
             <article key={user.id} className="request-card admin-request-card">
@@ -198,8 +226,8 @@ export default function AdminDashboardPage() {
                 </select>
               </div>
               <div className="meta-grid">
-                <span>Phone: {user.phone || 'Not provided'}</span>
-                <span>Status: {user.is_active ? 'Active' : 'Inactive'}</span>
+                <span><strong>Phone:</strong> {user.phone || 'Not provided'}</span>
+                <span><strong>Status:</strong> {user.is_active ? 'Active' : 'Inactive'}</span>
               </div>
               <div className="request-actions">
                 <button
@@ -216,7 +244,12 @@ export default function AdminDashboardPage() {
       </section>
 
       <section className="panel requests-panel">
-        <h2>All assistance requests</h2>
+        <div className="panel-header">
+          <div>
+            <p className="eyebrow small">Operations</p>
+            <h2>All assistance requests</h2>
+          </div>
+        </div>
         <div className="request-list plus-table">
           {requests.map((request) => (
             <article key={request.id} className="request-card admin-request-card">
@@ -233,9 +266,9 @@ export default function AdminDashboardPage() {
                 </select>
               </div>
               <div className="meta-grid">
-                <span>Type: {request.assistance_type}</span>
-                <span>Contact: {request.preferred_contact_method}</span>
-                <span>Assigned staff: {request.staff_name || 'Not assigned yet'}</span>
+                <span><strong>Type:</strong> {request.assistance_type}</span>
+                <span><strong>Contact:</strong> {request.preferred_contact_method}</span>
+                <span><strong>Assigned staff:</strong> {request.staff_name || 'Not assigned yet'}</span>
               </div>
               <div className="request-actions">
                 <select
