@@ -21,6 +21,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -31,7 +34,19 @@ jobs:
       - name: Install client dependencies
         run: npm install --prefix client
 
+      - name: Set deployed API URL
+        env:
+          FRONTEND_API_URL: ${{ vars.VITE_API_BASE_URL }}
+        run: |
+          if [ -n "$FRONTEND_API_URL" ]; then
+            echo "VITE_API_BASE_URL=$FRONTEND_API_URL" >> "$GITHUB_ENV"
+          else
+            echo "VITE_API_BASE_URL=https://your-backend-domain.example/api" >> "$GITHUB_ENV"
+          fi
+
       - name: Build frontend
+        env:
+          VITE_API_BASE_URL: ${{ env.VITE_API_BASE_URL }}
         run: npm --prefix client run build
 
       - name: Upload Pages artifact
